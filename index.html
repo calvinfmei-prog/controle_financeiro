@@ -43,29 +43,43 @@
 
 <script>
   function carregarDashboard(data) {
-    const totalFixas = data.fixas.reduce((s, i) => s + i.valor, 0)
-    const totalParcelas = data.cartao
-      .filter(i => i.atual < i.parcelas)
-      .reduce((s, i) => s + i.valorParcela, 0)
-
-    const saldoInicial = data.config.saldoInicial || 0
-    const gastoMedio = data.config.gastoMedio || 0
-    const saldoProjetado = saldoInicial - totalFixas - totalParcelas
+    const d = data.dashboard
 
     document.getElementById('saldoAtual').innerText =
-      saldoInicial.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
+      (d.saldoAtual || 0).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      })
+
     document.getElementById('fixas').innerText =
-      totalFixas.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
+      data.fixas
+        .reduce((s, i) => s + i.valor, 0)
+        .toLocaleString('pt-BR', {
+          style: 'currency',
+          currency: 'BRL'
+        })
+
     document.getElementById('parcelas').innerText =
-      totalParcelas.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
+      (d.parcelasMes || 0).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      })
+
     document.getElementById('saldoProjetado').innerText =
-      saldoProjetado.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
+      (d.saldoProjetado || 0).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      })
+
     document.getElementById('gastoDia').innerText =
-      gastoMedio.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
+      (d.gastoDia || 0).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      })
   }
 </script>
 
-<script src="https://script.google.com/macros/s/AKfycbyH1zvraVyJxr6syGhNyW7V4J-uu4nixHdWThv2X2BB5g91WolS81fF6ZL351qSemQO2A/exec?callback=carregarDashboard"></script>
+<script src="https://script.google.com/macros/s/AKfycbzPGIYM1pUTCLN26afnFZAeIuAjTnULlwubgsi94FYCFC7VCEFJY-0jfTms3jNbYSpNpA/exec?callback=carregarDashboard"></script>
 
 
 </body>
