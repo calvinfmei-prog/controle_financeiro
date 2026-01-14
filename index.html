@@ -116,22 +116,34 @@
       const f = e.target
 
       const payload = {
-        data: f[0].value,
-        tipo: f[1].value,
-        descricao: f[2].value,
-        valor: f[3].value,
-        categoria: f[4].value
+        data: f.data.value,
+        tipo: f.tipo.value,
+        descricao: f.descricao.value,
+        valor: Number(f.valor.value),
+        categoria: f.categoria.value
       }
 
       await fetch(API_POST, {
         method: 'POST',
+        mode: 'no-cors', // 🔑 ESSENCIAL
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify(payload)
       })
 
-      document.getElementById('msg').innerText = '✅ Lançamento salvo!'
+      document.getElementById('msg').innerText =
+        '✅ Lançamento salvo com sucesso!'
+
       f.reset()
+
+      // Recarrega dashboard após salvar
+      const s = document.createElement('script')
+      s.src = API_POST + '?callback=carregarDashboard&t=' + Date.now()
+      document.body.appendChild(s)
     })
 </script>
+
 
 </body>
 </html>
