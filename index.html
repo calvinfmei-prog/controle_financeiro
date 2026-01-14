@@ -77,13 +77,50 @@
 
   <!-- Scripts -->
   <script>
-    // Valores fake por enquanto
-    document.getElementById('saldoAtual').innerText = 'R$ 14.356,28'
-    document.getElementById('fixas').innerText = 'R$ 9.689,09'
-    document.getElementById('parcelas').innerText = 'R$ 2.102,97'
-    document.getElementById('saldoProjetado').innerText = 'R$ 1.662,83'
-    document.getElementById('gastoDia').innerText = 'R$ 150,84'
+    async function fetchCSV(url) {
+      const res = await fetch(url)
+      const text = await res.text()
+      return text.split('\n').map(r => r.split(','))
+    }
+
+    const BASE_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRhxgwGsxs9XuwLPsjDcM2Xg5n28pKU2QdhvMGoPYE3gDovlARrB-28drKVVeMD98mFgZInhTdy8MSM/pub?output=csv'
+
+    async function carregarDashboard() {
+      const fixas = await fetchCSV(BASE_URL + '&sheet=Fixas')
+      const cartao = await fetchCSV(BASE_URL + '&sheet=Cartão(Parcelado)')
+      const config = await fetchCSV(BASE_URL + '&sheet=Config')
+
+      let totalFixas = 0
+      fixas.slice(1).forEach(l => {
+        const valor = parseFloat((l[1] || '0').replace('R$', '').replace('.', '').replace(',', '.'))
+        totalFixas += valor
+      })
+
+      let totalParcelas = 0
+      cartao.slice(1).forEach(l => {
+        const total = Number(l[2])
+        const atual = Number(l[3])
+        const valor = parseFloat((l[4] || '0').replace('R$', '').replace('.', '').replace(',', '.'))
+        if (atual < total) totalParcelas += valor
+      })
+
+      let saldoInicial = 0
+      let gastoMedio = 0
+      config.slice(1).forEach(l => {
+        if (l[0].includes('Saldo Inicial')) saldoInicial = parseFloat(l[1].replace('R$', '').replace('.', '').replace(',', '.'))
+        if (l[0].includes('Gasto Médio Diário')) gastoMedio = parseFloat(l[1].replace(',', '.'))
+      })
+
+      const saldoProjetado = saldoInicial - totalFixas - totalParcelas
+
+      document.getElementById('saldoAtual').innerText = saldoInicial.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
+      document.getElementById('fixas').innerText = totalFixas.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
+      document.getElementById('parcelas').innerText = totalParcelas.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
+      document.getElementById('saldoProjetado').innerText = saldoProjetado.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
+      document.getElementById('gastoDia').innerText = gastoMedio.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
+    }
+
+    carregarDashboard()
   </script>
 </body>
 </html>
-
