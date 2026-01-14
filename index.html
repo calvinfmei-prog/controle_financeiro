@@ -42,88 +42,45 @@
 </section>
 
 <script>
-  function parseCSV(text) {
-    const lines = text.trim().split('\n')
-    const delimiter = lines[0].includes(';') ? ';' : ','
-    const headers = lines[0].split(delimiter)
-
-    return lines.slice(1).map(line => {
-      const values = line.split(delimiter)
-      const obj = {}
-      headers.forEach((h, i) => obj[h.trim()] = values[i])
-      return obj
-    })
-  }
-
-  async function fetchCSV(url) {
-    const res = await fetch(url)
-    const text = await res.text()
-
-    return text
-      .trim()
-      .split('\n')
-      .map(r =>
-        r
-          .replace(/\r/g, '')
-          .split(';') // <-- AQUI ESTÁ A CORREÇÃO
-      )
-  }
-
-  const BASE =
-    'https://docs.google.com/spreadsheets/d/e/2PACX-1vRhxgwGsxs9XuwLPsjDcM2Xg5n28pKU2QdhvMGoPYE3gDovlARrB-28drKVVeMD98mFgZInhTdy8MSM/pub?output=csv'
+  const API_URL = 'https://script.google.com/macros/s/AKfycbzouu23-NjsZLuX9chZTrkJQjFcUFRPA2Yq4zpm7xDsdV8Pbayde8eyi9i27ngncwMUvQ/exec'
 
   async function carregarDashboard() {
-    const fixas = await fetchCSV(BASE + '&sheet=Fixas')
-    const cartao = await fetchCSV(BASE + '&sheet=Cartao(Parcelado)')
-    const config = await fetchCSV(BASE + '&sheet=Config')
+    const res = await fetch(API_URL)
+    const data = await res.json()
 
-    let totalFixas = 0
-    fixas.forEach(l => {
-      const v = (l['Valor mensal'] || '0')
-        .replace('R$', '').replace('.', '').replace(',', '.')
-      totalFixas += Number(v)
-    })
+    // Fixas
+    const totalFixas = data.fixas.reduce((s, i) => s + i.valor, 0)
 
-    let totalParcelas = 0
-    cartao.forEach(l => {
-      const total = Number(l['Número de parcelas'])
-      const atual = Number(l['Parcela atual'])
-      const valor = (l['Valor da parcela'] || '0')
-        .replace('R$', '').replace('.', '').replace(',', '.')
-      if (atual < total) totalParcelas += Number(valor)
-    })
+    // Cartão (parcelas ainda ativas)
+    const totalParcelas = data.cartao
+      .filter(i => i.atual < i.parcelas)
+      .reduce((s, i) => s + i.valorParcela, 0)
 
-    let saldoInicial = 0
-    let gastoMedio = 0
-    config.forEach(l => {
-      if (l['Saldo Inicial'])
-        saldoInicial = Number(l['Saldo Inicial']
-          .replace('R$', '').replace('.', '').replace(',', '.'))
-
-      if (l['Gasto Médio Diário'])
-        gastoMedio = Number(l['Gasto Médio Diário'].replace(',', '.'))
-    })
+    // Config
+    const saldoInicial = data.config.saldoInicial
+    const gastoMedio = data.config.gastoMedio
 
     const saldoProjetado = saldoInicial - totalFixas - totalParcelas
 
     document.getElementById('saldoAtual').innerText =
-      saldoInicial.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
+      saldoInicial.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
     document.getElementById('fixas').innerText =
-      totalFixas.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
+      totalFixas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
     document.getElementById('parcelas').innerText =
-      totalParcelas.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
+      totalParcelas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
     document.getElementById('saldoProjetado').innerText =
-      saldoProjetado.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
+      saldoProjetado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
     document.getElementById('gastoDia').innerText =
-      gastoMedio.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
+      gastoMedio.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
   }
 
   carregarDashboard()
 </script>
+
 
 </body>
 </html>
