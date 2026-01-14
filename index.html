@@ -87,7 +87,7 @@
 
     async function carregarDashboard() {
       const fixas = await fetchCSV(BASE_URL + '&sheet=Fixas')
-      const cartao = await fetchCSV(BASE_URL + '&sheet=Cartão(Parcelado)')
+      const cartao = await fetchCSV(BASE_URL + '&sheet=Cartao(Parcelado)')
       const config = await fetchCSV(BASE_URL + '&sheet=Config')
 
       let totalFixas = 0
