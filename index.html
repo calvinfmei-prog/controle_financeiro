@@ -5,122 +5,117 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Finance Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            bg: '#020617',
-            card: '#020617',
-            primary: '#22c55e',
-            danger: '#ef4444',
-            warning: '#facc15',
-            info: '#3b82f6'
-          }
-        }
-      }
-    }
-  </script>
 </head>
+
 <body class="bg-slate-950 text-slate-200 min-h-screen">
 
-  <!-- Header -->
-  <header class="p-6 border-b border-slate-800">
-    <h1 class="text-2xl font-bold">💳 Meu Financeiro</h1>
-    <p class="text-slate-400">Visão geral do mês</p>
-  </header>
+<header class="p-6 border-b border-slate-800">
+  <h1 class="text-2xl font-bold">💳 Meu Financeiro</h1>
+  <p class="text-slate-400">Visão geral do mês</p>
+</header>
 
-  <!-- Dashboard Cards -->
-  <section class="p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-6">
-    <div class="bg-card rounded-xl p-5 shadow">
-      <p class="text-slate-400 text-sm">Saldo Atual</p>
-      <h2 id="saldoAtual" class="text-2xl font-bold text-primary">R$ --</h2>
-    </div>
+<section class="p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-6">
+  <div class="bg-slate-900 rounded-xl p-5">
+    <p class="text-slate-400 text-sm">Saldo Atual</p>
+    <h2 id="saldoAtual" class="text-2xl font-bold text-green-400">R$ --</h2>
+  </div>
 
-    <div class="bg-card rounded-xl p-5 shadow">
-      <p class="text-slate-400 text-sm">Despesas Fixas</p>
-      <h2 id="fixas" class="text-2xl font-bold">R$ --</h2>
-    </div>
+  <div class="bg-slate-900 rounded-xl p-5">
+    <p class="text-slate-400 text-sm">Despesas Fixas</p>
+    <h2 id="fixas" class="text-2xl font-bold">R$ --</h2>
+  </div>
 
-    <div class="bg-card rounded-xl p-5 shadow">
-      <p class="text-slate-400 text-sm">Parcelas do Mês</p>
-      <h2 id="parcelas" class="text-2xl font-bold">R$ --</h2>
-    </div>
+  <div class="bg-slate-900 rounded-xl p-5">
+    <p class="text-slate-400 text-sm">Parcelas do Mês</p>
+    <h2 id="parcelas" class="text-2xl font-bold">R$ --</h2>
+  </div>
 
-    <div class="bg-card rounded-xl p-5 shadow">
-      <p class="text-slate-400 text-sm">Saldo Projetado</p>
-      <h2 id="saldoProjetado" class="text-2xl font-bold">R$ --</h2>
-    </div>
+  <div class="bg-slate-900 rounded-xl p-5">
+    <p class="text-slate-400 text-sm">Saldo Projetado</p>
+    <h2 id="saldoProjetado" class="text-2xl font-bold">R$ --</h2>
+  </div>
 
-    <div class="bg-card rounded-xl p-5 shadow border border-info">
-      <p class="text-slate-400 text-sm">Pode gastar por dia</p>
-      <h2 id="gastoDia" class="text-2xl font-bold text-info">R$ --</h2>
-    </div>
-  </section>
+  <div class="bg-slate-900 rounded-xl p-5 border border-blue-500">
+    <p class="text-slate-400 text-sm">Pode gastar por dia</p>
+    <h2 id="gastoDia" class="text-2xl font-bold text-blue-400">R$ --</h2>
+  </div>
+</section>
 
-  <!-- Novo Lançamento -->
-  <section class="p-6">
-    <div class="bg-card rounded-xl p-6 shadow max-w-2xl">
-      <h3 class="text-xl font-semibold mb-4">➕ Novo Lançamento</h3>
-      <form class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <input type="date" class="bg-slate-900 p-3 rounded" />
-        <select class="bg-slate-900 p-3 rounded">
-          <option>Saída</option>
-          <option>Entrada</option>
-        </select>
-        <input type="text" placeholder="Descrição" class="bg-slate-900 p-3 rounded md:col-span-2" />
-        <input type="number" placeholder="Valor" class="bg-slate-900 p-3 rounded" />
-        <button type="button" class="bg-primary text-black rounded p-3 font-semibold hover:opacity-90 md:col-span-2">Registrar</button>
-      </form>
-    </div>
-  </section>
+<script>
+  function parseCSV(text) {
+    const lines = text.trim().split('\n')
+    const delimiter = lines[0].includes(';') ? ';' : ','
+    const headers = lines[0].split(delimiter)
 
-  <!-- Scripts -->
-  <script>
-    async function fetchCSV(url) {
-      const res = await fetch(url)
-      const text = await res.text()
-      return text.split('\n').map(r => r.split(','))
-    }
+    return lines.slice(1).map(line => {
+      const values = line.split(delimiter)
+      const obj = {}
+      headers.forEach((h, i) => obj[h.trim()] = values[i])
+      return obj
+    })
+  }
 
-    const BASE_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRhxgwGsxs9XuwLPsjDcM2Xg5n28pKU2QdhvMGoPYE3gDovlARrB-28drKVVeMD98mFgZInhTdy8MSM/pub?output=csv'
+  async function fetchCSV(url) {
+    const res = await fetch(url)
+    const text = await res.text()
+    return parseCSV(text)
+  }
 
-    async function carregarDashboard() {
-      const fixas = await fetchCSV(BASE_URL + '&sheet=Fixas')
-      const cartao = await fetchCSV(BASE_URL + '&sheet=Cartao(Parcelado)')
-      const config = await fetchCSV(BASE_URL + '&sheet=Config')
+  const BASE =
+    'https://docs.google.com/spreadsheets/d/e/2PACX-1vRhxgwGsxs9XuwLPsjDcM2Xg5n28pKU2QdhvMGoPYE3gDovlARrB-28drKVVeMD98mFgZInhTdy8MSM/pub?output=csv'
 
-      let totalFixas = 0
-      fixas.slice(1).forEach(l => {
-        const valor = parseFloat((l[3] || '0').replace('R$', '').replace('.', '').replace(',', '.'))
-        totalFixas += valor
-      })
+  async function carregarDashboard() {
+    const fixas = await fetchCSV(BASE + '&sheet=Fixas')
+    const cartao = await fetchCSV(BASE + '&sheet=Cartao(Parcelado)')
+    const config = await fetchCSV(BASE + '&sheet=Config')
 
-      let totalParcelas = 0
-      cartao.slice(1).forEach(l => {
-        const total = Number(l[2])
-        const atual = Number(l[3])
-        const valor = parseFloat((l[4] || '0').replace('R$', '').replace('.', '').replace(',', '.'))
-        if (atual < total) totalParcelas += valor
-      })
+    let totalFixas = 0
+    fixas.forEach(l => {
+      const v = (l['Valor mensal'] || '0')
+        .replace('R$', '').replace('.', '').replace(',', '.')
+      totalFixas += Number(v)
+    })
 
-      let saldoInicial = 0
-      let gastoMedio = 0
-      config.slice(1).forEach(l => {
-        if (l[0].includes('Saldo Inicial')) saldoInicial = parseFloat(l[1].replace('R$', '').replace('.', '').replace(',', '.'))
-        if (l[0].includes('Gasto Médio Diário')) gastoMedio = parseFloat(l[1].replace(',', '.'))
-      })
+    let totalParcelas = 0
+    cartao.forEach(l => {
+      const total = Number(l['Número de parcelas'])
+      const atual = Number(l['Parcela atual'])
+      const valor = (l['Valor da parcela'] || '0')
+        .replace('R$', '').replace('.', '').replace(',', '.')
+      if (atual < total) totalParcelas += Number(valor)
+    })
 
-      const saldoProjetado = saldoInicial - totalFixas - totalParcelas
+    let saldoInicial = 0
+    let gastoMedio = 0
+    config.forEach(l => {
+      if (l['Saldo Inicial'])
+        saldoInicial = Number(l['Saldo Inicial']
+          .replace('R$', '').replace('.', '').replace(',', '.'))
 
-      document.getElementById('saldoAtual').innerText = saldoInicial.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
-      document.getElementById('fixas').innerText = totalFixas.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
-      document.getElementById('parcelas').innerText = totalParcelas.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
-      document.getElementById('saldoProjetado').innerText = saldoProjetado.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
-      document.getElementById('gastoDia').innerText = gastoMedio.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
-    }
+      if (l['Gasto Médio Diário'])
+        gastoMedio = Number(l['Gasto Médio Diário'].replace(',', '.'))
+    })
 
-    carregarDashboard()
-  </script>
+    const saldoProjetado = saldoInicial - totalFixas - totalParcelas
+
+    document.getElementById('saldoAtual').innerText =
+      saldoInicial.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
+
+    document.getElementById('fixas').innerText =
+      totalFixas.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
+
+    document.getElementById('parcelas').innerText =
+      totalParcelas.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
+
+    document.getElementById('saldoProjetado').innerText =
+      saldoProjetado.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
+
+    document.getElementById('gastoDia').innerText =
+      gastoMedio.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
+  }
+
+  carregarDashboard()
+</script>
+
 </body>
 </html>
