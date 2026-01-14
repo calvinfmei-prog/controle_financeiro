@@ -92,7 +92,7 @@
 
       let totalFixas = 0
       fixas.slice(1).forEach(l => {
-        const valor = parseFloat((l[1] || '0').replace('R$', '').replace('.', '').replace(',', '.'))
+        const valor = parseFloat((l[3] || '0').replace('R$', '').replace('.', '').replace(',', '.'))
         totalFixas += valor
       })
 
