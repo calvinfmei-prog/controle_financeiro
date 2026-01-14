@@ -58,7 +58,15 @@
   async function fetchCSV(url) {
     const res = await fetch(url)
     const text = await res.text()
-    return parseCSV(text)
+
+    return text
+      .trim()
+      .split('\n')
+      .map(r =>
+        r
+          .replace(/\r/g, '')
+          .split(';') // <-- AQUI ESTÁ A CORREÇÃO
+      )
   }
 
   const BASE =
