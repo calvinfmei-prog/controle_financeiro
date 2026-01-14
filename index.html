@@ -42,44 +42,30 @@
 </section>
 
 <script>
-  const API_URL = 'https://script.google.com/macros/s/AKfycbwNAOE5X-v2ujruiGLPESlZO8VY941N_BREx2zhd--BM-IQxHBXdFp3KOCabo114Wtc/exec'
-
-  async function carregarDashboard() {
-    const res = await fetch(API_URL)
-    const data = await res.json()
-
-    // Fixas
+  function carregarDashboard(data) {
     const totalFixas = data.fixas.reduce((s, i) => s + i.valor, 0)
-
-    // Cartão (parcelas ainda ativas)
     const totalParcelas = data.cartao
       .filter(i => i.atual < i.parcelas)
       .reduce((s, i) => s + i.valorParcela, 0)
 
-    // Config
-    const saldoInicial = data.config.saldoInicial
-    const gastoMedio = data.config.gastoMedio
-
+    const saldoInicial = data.config.saldoInicial || 0
+    const gastoMedio = data.config.gastoMedio || 0
     const saldoProjetado = saldoInicial - totalFixas - totalParcelas
 
     document.getElementById('saldoAtual').innerText =
-      saldoInicial.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-
+      saldoInicial.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
     document.getElementById('fixas').innerText =
-      totalFixas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-
+      totalFixas.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
     document.getElementById('parcelas').innerText =
-      totalParcelas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-
+      totalParcelas.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
     document.getElementById('saldoProjetado').innerText =
-      saldoProjetado.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-
+      saldoProjetado.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
     document.getElementById('gastoDia').innerText =
-      gastoMedio.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+      gastoMedio.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
   }
-
-  carregarDashboard()
 </script>
+
+<script src="https://script.google.com/macros/s/AKfycbz3sEGRpvtiyTihVGBIoxuhzVTxPkxsEVYef_qSdt3-wlsw_WY8SXl8rceIGFfA4T_Wkw/exec?callback=carregarDashboard"></script>
 
 
 </body>
